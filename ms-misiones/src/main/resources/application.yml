@@ -1,0 +1,46 @@
+server:
+  port: ${SERVER_PORT:8083}
+
+spring:
+  application:
+    name: ms-misiones
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/agrodrones}
+    username: ${DB_USER:misiones_user}
+    password: ${DB_PASSWORD:misiones_pass}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: misiones
+  flyway:
+    schemas: misiones
+    default-schema: misiones
+    create-schemas: false
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://localhost:8081/realms/agrodrones/protocol/openid-connect/certs}
+          issuer-uri: ${KEYCLOAK_ISSUER:http://localhost:8081/realms/agrodrones}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+agrodrones:
+  openapi:
+    titulo: ms-misiones
+    descripcion: Pilotos, drones, productos y misiones. Decide si una mision se autoriza, cuando y con quien.
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs

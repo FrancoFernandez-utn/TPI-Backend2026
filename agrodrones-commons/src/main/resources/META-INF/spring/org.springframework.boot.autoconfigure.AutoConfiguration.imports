@@ -1,2 +1,3 @@
 ar.edu.tpi.commons.CommonsAutoConfiguration
+ar.edu.tpi.commons.seguridad.SeguridadServicioAutoConfiguration
 ar.edu.tpi.commons.openapi.OpenApiBearerConfig
