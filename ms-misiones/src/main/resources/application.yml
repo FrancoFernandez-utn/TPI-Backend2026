@@ -57,6 +57,16 @@ agrodrones:
     zona-horaria: America/Argentina/Buenos_Aires
     open-meteo:
       url: ${OPEN_METEO_URL:https://api.open-meteo.com}
+    # Escenarios del proveedor simulado (solo se usan con proveedor: simulado). Un lote creado en estas
+    # coordenadas recibe ese clima; cualquier otro recibe el escenario BUENO.
+    simulado:
+      escenarios:
+        - lat: -33.1234
+          lon: -64.3456
+          escenario: VENTOSO
+        - lat: -32.5
+          lon: -63.5
+          escenario: SIN_SERVICIO
   campos:
     url: ${MS_CAMPOS_URL:http://localhost:8082}
   reglas:

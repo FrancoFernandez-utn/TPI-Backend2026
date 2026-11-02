@@ -1,0 +1,163 @@
+{
+  "realm": "agrodrones",
+  "displayName": "AgroDrones",
+  "enabled": true,
+  "sslRequired": "none",
+  "accessTokenLifespan": 1800,
+  "registrationAllowed": false,
+  "roles": {
+    "realm": [
+      {
+        "name": "ADMIN",
+        "description": "Administra catalogos, umbrales climaticos y ve todo"
+      },
+      {
+        "name": "PRODUCTOR",
+        "description": "Gestiona sus establecimientos y lotes y solicita misiones"
+      },
+      {
+        "name": "PILOTO",
+        "description": "Gestiona su perfil y ve las misiones asignadas"
+      },
+      {
+        "name": "SERVICIO",
+        "description": "Rol tecnico para llamadas internas entre microservicios"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "agrodrones-web",
+      "name": "Cliente publico de login (Postman, Swagger)",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "redirectUris": [
+        "http://localhost:8080/*",
+        "https://oauth.pstmn.io/v1/callback"
+      ],
+      "webOrigins": [
+        "+"
+      ]
+    },
+    {
+      "clientId": "ms-misiones",
+      "name": "ms-misiones (client credentials hacia ms-campos)",
+      "enabled": true,
+      "publicClient": false,
+      "protocol": "openid-connect",
+      "clientAuthenticatorType": "client-secret",
+      "secret": "ms-misiones-secret",
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false
+    }
+  ],
+  "users": [
+    {
+      "id": "a1b2c3d4-0000-4000-8000-000000000001",
+      "username": "admin1",
+      "enabled": true,
+      "email": "admin1@agrodrones.test",
+      "emailVerified": true,
+      "firstName": "Ana",
+      "lastName": "Administradora",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "ADMIN"
+      ]
+    },
+    {
+      "id": "a1b2c3d4-0000-4000-8000-000000000002",
+      "username": "productor1",
+      "enabled": true,
+      "email": "productor1@agrodrones.test",
+      "emailVerified": true,
+      "firstName": "Pedro",
+      "lastName": "Productor",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "productor123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "PRODUCTOR"
+      ]
+    },
+    {
+      "id": "a1b2c3d4-0000-4000-8000-000000000003",
+      "username": "productor2",
+      "enabled": true,
+      "email": "productor2@agrodrones.test",
+      "emailVerified": true,
+      "firstName": "Paula",
+      "lastName": "Productora",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "productor123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "PRODUCTOR"
+      ]
+    },
+    {
+      "id": "a1b2c3d4-0000-4000-8000-000000000004",
+      "username": "piloto1",
+      "enabled": true,
+      "email": "piloto1@agrodrones.test",
+      "emailVerified": true,
+      "firstName": "Lucia",
+      "lastName": "Piloto",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "piloto123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "PILOTO"
+      ]
+    },
+    {
+      "id": "a1b2c3d4-0000-4000-8000-000000000005",
+      "username": "piloto2",
+      "enabled": true,
+      "email": "piloto2@agrodrones.test",
+      "emailVerified": true,
+      "firstName": "Mateo",
+      "lastName": "Piloto",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "piloto123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "PILOTO"
+      ]
+    },
+    {
+      "username": "service-account-ms-misiones",
+      "enabled": true,
+      "serviceAccountClientId": "ms-misiones",
+      "realmRoles": [
+        "SERVICIO"
+      ]
+    }
+  ]
+}
