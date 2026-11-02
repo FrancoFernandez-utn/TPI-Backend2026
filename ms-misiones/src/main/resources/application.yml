@@ -21,6 +21,17 @@ spring:
     create-schemas: false
   security:
     oauth2:
+      # Token de servicio de ms-misiones para llamar a /internal/** de ms-campos (client credentials).
+      client:
+        registration:
+          ms-campos:
+            provider: keycloak
+            client-id: ${KEYCLOAK_CLIENT_ID:ms-misiones}
+            client-secret: ${KEYCLOAK_CLIENT_SECRET:ms-misiones-secret}
+            authorization-grant-type: client_credentials
+        provider:
+          keycloak:
+            token-uri: ${KEYCLOAK_TOKEN_URI:http://localhost:8081/realms/agrodrones/protocol/openid-connect/token}
       resourceserver:
         jwt:
           jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://localhost:8081/realms/agrodrones/protocol/openid-connect/certs}
@@ -40,6 +51,20 @@ agrodrones:
   openapi:
     titulo: ms-misiones
     descripcion: Pilotos, drones, productos y misiones. Decide si una mision se autoriza, cuando y con quien.
+  clima:
+    # openmeteo (real) o simulado
+    proveedor: ${CLIMA_PROVEEDOR:openmeteo}
+    zona-horaria: America/Argentina/Buenos_Aires
+    open-meteo:
+      url: ${OPEN_METEO_URL:https://api.open-meteo.com}
+  campos:
+    url: ${MS_CAMPOS_URL:http://localhost:8082}
+  reglas:
+    horas-minimas-pulverizacion: 20
+    max-horas-piloto-dia: 6
+    horizonte-horas: 72
+    minutos-recambio-bateria: 10
+    horas-lluvia-siguientes: 4
 
 springdoc:
   api-docs:
