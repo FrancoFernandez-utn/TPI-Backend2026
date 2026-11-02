@@ -5,6 +5,8 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -29,6 +31,8 @@ public class OpenApiBearerConfig {
             @Value("${agrodrones.openapi.version:1.0.0}") String version) {
         return new OpenAPI()
                 .info(new Info().title(titulo).description(descripcion).version(version))
+                // Servidor relativo: la interfaz Swagger del Gateway prueba los endpoints a traves del Gateway.
+                .servers(List.of(new Server().url("/").description("API Gateway")))
                 .components(new Components().addSecuritySchemes(ESQUEMA, new SecurityScheme()
                         .type(SecurityScheme.Type.HTTP)
                         .scheme("bearer")

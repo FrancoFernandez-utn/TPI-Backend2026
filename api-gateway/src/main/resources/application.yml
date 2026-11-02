@@ -1,0 +1,61 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: api-gateway
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://localhost:8081/realms/agrodrones/protocol/openid-connect/certs}
+          issuer-uri: ${KEYCLOAK_ISSUER:http://localhost:8081/realms/agrodrones}
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            # Terreno: establecimientos, lotes, cultivos
+            - id: ms-campos
+              uri: ${MS_CAMPOS_URL:http://localhost:8082}
+              predicates:
+                - Path=/api/establecimientos/**,/api/lotes/**
+            # Operacion aerea: recursos, catalogos y misiones
+            - id: ms-misiones
+              uri: ${MS_MISIONES_URL:http://localhost:8083}
+              predicates:
+                - Path=/api/pilotos/**,/api/drones/**,/api/modelos-dron/**,/api/productos/**,/api/umbrales/**,/api/misiones/**
+            # Documentos OpenAPI de cada servicio, para la interfaz Swagger del Gateway
+            - id: docs-ms-campos
+              uri: ${MS_CAMPOS_URL:http://localhost:8082}
+              predicates:
+                - Path=/docs/campos/v3/api-docs
+              filters:
+                - RewritePath=/docs/campos/(?<resto>.*), /$\{resto}
+            - id: docs-ms-misiones
+              uri: ${MS_MISIONES_URL:http://localhost:8083}
+              predicates:
+                - Path=/docs/misiones/v3/api-docs
+              filters:
+                - RewritePath=/docs/misiones/(?<resto>.*), /$\{resto}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    urls:
+      - name: ms-campos
+        url: /docs/campos/v3/api-docs
+      - name: ms-misiones
+        url: /docs/misiones/v3/api-docs
