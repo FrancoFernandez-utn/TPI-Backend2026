@@ -1,0 +1,2062 @@
+{
+  "info": {
+    "name": "AgroDrones - MVP",
+    "description": "Proceso central del MVP de punta a punta a traves del API Gateway, con escenarios positivos y negativos. Ejecutar las carpetas en orden. Los pasos que dependen del clima simulado se omiten solos si ms-misiones usa Open-Meteo real.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Fecha limite de las misiones: 48 horas desde ahora.",
+          "pm.collectionVariables.set('fechaLimite', new Date(Date.now() + 48 * 3600 * 1000).toISOString().replace(/\\.\\d+Z$/, 'Z'));"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "gatewayUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "keycloakUrl",
+      "value": "http://localhost:8081"
+    },
+    {
+      "key": "tokenAdmin",
+      "value": ""
+    },
+    {
+      "key": "tokenProductor",
+      "value": ""
+    },
+    {
+      "key": "tokenProductor2",
+      "value": ""
+    },
+    {
+      "key": "tokenPiloto",
+      "value": ""
+    },
+    {
+      "key": "tokenPiloto2",
+      "value": ""
+    },
+    {
+      "key": "sufijo",
+      "value": ""
+    },
+    {
+      "key": "fechaLimite",
+      "value": ""
+    },
+    {
+      "key": "modoSimulado",
+      "value": "false"
+    }
+  ],
+  "item": [
+    {
+      "name": "00 Autenticacion (Keycloak)",
+      "item": [
+        {
+          "name": "Token admin1",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{keycloakUrl}}/realms/agrodrones/protocol/openid-connect/token",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "client_id",
+                  "value": "agrodrones-web"
+                },
+                {
+                  "key": "username",
+                  "value": "admin1"
+                },
+                {
+                  "key": "password",
+                  "value": "admin123"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Keycloak emite el token de admin1\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"tokenAdmin\", pm.response.json().access_token);",
+                  "pm.collectionVariables.set(\"sufijo\", Date.now().toString().slice(-6));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Token productor1",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{keycloakUrl}}/realms/agrodrones/protocol/openid-connect/token",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "client_id",
+                  "value": "agrodrones-web"
+                },
+                {
+                  "key": "username",
+                  "value": "productor1"
+                },
+                {
+                  "key": "password",
+                  "value": "productor123"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Keycloak emite el token de productor1\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"tokenProductor\", pm.response.json().access_token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Token productor2",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{keycloakUrl}}/realms/agrodrones/protocol/openid-connect/token",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "client_id",
+                  "value": "agrodrones-web"
+                },
+                {
+                  "key": "username",
+                  "value": "productor2"
+                },
+                {
+                  "key": "password",
+                  "value": "productor123"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Keycloak emite el token de productor2\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"tokenProductor2\", pm.response.json().access_token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Token piloto1",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{keycloakUrl}}/realms/agrodrones/protocol/openid-connect/token",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "client_id",
+                  "value": "agrodrones-web"
+                },
+                {
+                  "key": "username",
+                  "value": "piloto1"
+                },
+                {
+                  "key": "password",
+                  "value": "piloto123"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Keycloak emite el token de piloto1\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"tokenPiloto\", pm.response.json().access_token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Token piloto2",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{keycloakUrl}}/realms/agrodrones/protocol/openid-connect/token",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                },
+                {
+                  "key": "client_id",
+                  "value": "agrodrones-web"
+                },
+                {
+                  "key": "username",
+                  "value": "piloto2"
+                },
+                {
+                  "key": "password",
+                  "value": "piloto123"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Keycloak emite el token de piloto2\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"tokenPiloto2\", pm.response.json().access_token);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "01 Seguridad",
+      "item": [
+        {
+          "name": "Sin token -> 401",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{gatewayUrl}}/api/lotes/mios",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+                  "",
+                  "pm.test(\"Formato de error comun con codigo NO_AUTENTICADO\", () => {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j.codigo).to.eql(\"NO_AUTENTICADO\");",
+                  "    pm.expect(j).to.have.property(\"mensaje\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Token invalido -> 401",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer no-es-un-token"
+              }
+            ],
+            "url": "{{gatewayUrl}}/api/lotes/mios",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ruta interna bloqueada por el Gateway -> 403",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{gatewayUrl}}/internal/lotes/900001/contexto",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenProductor}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));",
+                  "",
+                  "pm.test(\"Formato de error comun con codigo ACCESO_DENEGADO\", () => {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j.codigo).to.eql(\"ACCESO_DENEGADO\");",
+                  "    pm.expect(j).to.have.property(\"mensaje\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Rol insuficiente: un piloto no ve lotes -> 403",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{gatewayUrl}}/api/lotes/mios",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenPiloto}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));",
+                  "",
+                  "pm.test(\"Formato de error comun con codigo ACCESO_DENEGADO\", () => {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j.codigo).to.eql(\"ACCESO_DENEGADO\");",
+                  "    pm.expect(j).to.have.property(\"mensaje\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Rol insuficiente: un productor no crea productos -> 403",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{gatewayUrl}}/api/productos",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenProductor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"X\",\n  \"intervaloDias\": 1\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 Campos (productor1)",
+      "item": [
+        {
+          "name": "Crear establecimiento",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{gatewayUrl}}/api/establecimientos",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenProductor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"La Esperanza {{sufijo}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "",
+                  "pm.collectionVariables.set(\"establecimientoId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear lote con buen clima",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{gatewayUrl}}/api/establecimientos/{{establecimientoId}}/lotes",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenProductor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Lote Norte\",\n  \"lat\": -31.42,\n  \"lon\": -64.19,\n  \"hectareas\": 20,\n  \"cultivo\": \"soja\",\n  \"etapa\": \"VEGETATIVO\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Queda ACTIVO con su cultivo y etapa\", () => {",
+                  "    pm.expect(j.estado).to.eql(\"ACTIVO\");",
+                  "    pm.expect(j.cultivoActual.etapa).to.eql(\"VEGETATIVO\");",
+                  "});",
+                  "pm.collectionVariables.set(\"loteNorteId\", j.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear lote en zona ventosa (escenario VENTOSO del simulador)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{gatewayUrl}}/api/establecimientos/{{establecimientoId}}/lotes",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenProductor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"El Vendaval\",\n  \"lat\": -33.1234,\n  \"lon\": -64.3456,\n  \"hectareas\": 15,\n  \"cultivo\": \"maiz\",\n  \"etapa\": \"VEGETATIVO\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"loteVentosoId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear lote que luego entra en floracion",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{gatewayUrl}}/api/establecimientos/{{establecimientoId}}/lotes",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenProductor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Lote Sur\",\n  \"lat\": -31.45,\n  \"lon\": -64.25,\n  \"hectareas\": 10,\n  \"cultivo\": \"girasol\",\n  \"etapa\": \"VEGETATIVO\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"loteSurId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear lote donde el clima no responde (escenario SIN_SERVICIO del simulador)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{gatewayUrl}}/api/establecimientos/{{establecimientoId}}/lotes",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenProductor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Lote Aislado\",\n  \"lat\": -32.5,\n  \"lon\": -63.5,\n  \"hectareas\": 10,\n  \"cultivo\": \"trigo\",\n  \"etapa\": \"VEGETATIVO\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"loteSinServicioId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Lote con datos invalidos -> 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{gatewayUrl}}/api/establecimientos/{{establecimientoId}}/lotes",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenProductor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"X\",\n  \"lat\": -95,\n  \"lon\": -64,\n  \"hectareas\": 0,\n  \"cultivo\": \"soja\",\n  \"etapa\": \"VEGETATIVO\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+                  "",
+                  "pm.test(\"Formato de error comun con codigo SOLICITUD_INVALIDA\", () => {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j.codigo).to.eql(\"SOLICITUD_INVALIDA\");",
+                  "    pm.expect(j).to.have.property(\"mensaje\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cambiar etapa del Lote Sur a FLORACION (agrega historial)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{gatewayUrl}}/api/lotes/{{loteSurId}}/cultivo",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenProductor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cultivo\": \"girasol\",\n  \"etapa\": \"FLORACION\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"La etapa actual es FLORACION\", () => pm.expect(pm.response.json().cultivoActual.etapa).to.eql(\"FLORACION\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Otro productor no puede modificar el lote -> 404",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{gatewayUrl}}/api/lotes/{{loteSurId}}/cultivo",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenProductor2}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cultivo\": \"maiz\",\n  \"etapa\": \"SIEMBRA\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+                  "",
+                  "pm.test(\"Formato de error comun con codigo RECURSO_NO_ENCONTRADO\", () => {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j.codigo).to.eql(\"RECURSO_NO_ENCONTRADO\");",
+                  "    pm.expect(j).to.have.property(\"mensaje\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Mis lotes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{gatewayUrl}}/api/lotes/mios",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenProductor}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Incluye el Lote Norte\", () => {",
+                  "    const ids = pm.response.json().map(l => l.id);",
+                  "    pm.expect(ids).to.include(Number(pm.collectionVariables.get(\"loteNorteId\")));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 Catalogos (admin1)",
+      "item": [
+        {
+          "name": "Crear modelo de dron pulverizador",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{gatewayUrl}}/api/modelos-dron",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Agras T40 {{sufijo}}\",\n  \"capacidadL\": 40,\n  \"haPorHora\": 10,\n  \"haPorVuelo\": 10,\n  \"limiteRafagaKmh\": 35,\n  \"tieneCamara\": false\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"modeloPulverizadorId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear modelo de dron con camara",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{gatewayUrl}}/api/modelos-dron",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Mavic Multiespectral {{sufijo}}\",\n  \"capacidadL\": 0,\n  \"haPorHora\": 25,\n  \"haPorVuelo\": 25,\n  \"limiteRafagaKmh\": 38,\n  \"tieneCamara\": true\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"modeloCamaraId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar modelos (cualquier usuario autenticado)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{gatewayUrl}}/api/modelos-dron",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenPiloto}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear producto con etapa prohibida",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{gatewayUrl}}/api/productos",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Herbicida {{sufijo}}\",\n  \"intervaloDias\": 7,\n  \"etapasProhibidas\": [\n    \"FLORACION\"\n  ]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"productoId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar productos (productor)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{gatewayUrl}}/api/productos",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenProductor}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ver umbrales climaticos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{gatewayUrl}}/api/umbrales",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenProductor}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"PULVERIZACION exige viento entre 3 y 15 km/h\", () => {",
+                  "    const p = pm.response.json().find(t => t.tipo === \"PULVERIZACION\");",
+                  "    const v = p.umbrales.find(u => u.variable === \"VIENTO\");",
+                  "    pm.expect(v.minimo).to.eql(3);",
+                  "    pm.expect(v.maximo).to.eql(15);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Editar umbrales de SIEMBRA_COBERTURA (ADMIN)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{gatewayUrl}}/api/umbrales/SIEMBRA_COBERTURA",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"umbrales\": [\n    {\n      \"variable\": \"VIENTO\",\n      \"maximo\": 20,\n      \"maxInclusivo\": false\n    },\n    {\n      \"variable\": \"RAFAGA\",\n      \"maximo\": 30,\n      \"maxInclusivo\": false\n    },\n    {\n      \"variable\": \"TEMPERATURA\",\n      \"minimo\": 0,\n      \"minInclusivo\": true,\n      \"maximo\": 38,\n      \"maxInclusivo\": true\n    },\n    {\n      \"variable\": \"PRECIPITACION\",\n      \"maximo\": 1,\n      \"maxInclusivo\": false\n    }\n  ]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Umbral invalido (minimo mayor al maximo) -> 400",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{gatewayUrl}}/api/umbrales/MONITOREO",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"umbrales\": [\n    {\n      \"variable\": \"VIENTO\",\n      \"minimo\": 10,\n      \"maximo\": 5\n    }\n  ]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+                  "",
+                  "pm.test(\"Formato de error comun con codigo SOLICITUD_INVALIDA\", () => {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j.codigo).to.eql(\"SOLICITUD_INVALIDA\");",
+                  "    pm.expect(j).to.have.property(\"mensaje\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04 Pilotos y drones",
+      "item": [
+        {
+          "name": "Perfil de piloto1 (PULVERIZACION)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{gatewayUrl}}/api/pilotos",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenPiloto}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"licenciaNro\": \"ANAC-1001\",\n  \"licenciaVence\": \"2030-12-31\",\n  \"horasVuelo\": 45,\n  \"habilitaciones\": [\n    \"PULVERIZACION\",\n    \"SIEMBRA_COBERTURA\"\n  ]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Se crea el perfil (o ya existia de una corrida anterior)\", () =>",
+                  "    pm.expect(pm.response.code).to.be.oneOf([201, 409]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Perfil de piloto2 (MONITOREO)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{gatewayUrl}}/api/pilotos",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenPiloto2}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"licenciaNro\": \"ANAC-2002\",\n  \"licenciaVence\": \"2030-12-31\",\n  \"horasVuelo\": 8,\n  \"habilitaciones\": [\n    \"MONITOREO\"\n  ]\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Se crea el perfil (o ya existia de una corrida anterior)\", () =>",
+                  "    pm.expect(pm.response.code).to.be.oneOf([201, 409]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Mi perfil (piloto1)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{gatewayUrl}}/api/pilotos/yo",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenPiloto}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar dron pulverizador (piloto1)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{gatewayUrl}}/api/drones",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenPiloto}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"modeloId\": {{modeloPulverizadorId}},\n  \"matricula\": \"LV-P{{sufijo}}\",\n  \"registroVence\": \"2030-06-30\",\n  \"seguroVence\": \"2030-06-30\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "",
+                  "pm.test(\"Queda OPERATIVO\", () => pm.expect(pm.response.json().estado).to.eql(\"OPERATIVO\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar dron con camara (admin1)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{gatewayUrl}}/api/drones",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"modeloId\": {{modeloCamaraId}},\n  \"matricula\": \"LV-C{{sufijo}}\",\n  \"registroVence\": \"2030-06-30\",\n  \"seguroVence\": \"2030-06-30\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Matricula duplicada -> 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{gatewayUrl}}/api/drones",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdmin}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"modeloId\": {{modeloCamaraId}},\n  \"matricula\": \"LV-C{{sufijo}}\",\n  \"registroVence\": \"2030-06-30\",\n  \"seguroVence\": \"2030-06-30\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));",
+                  "",
+                  "pm.test(\"Formato de error comun con codigo MATRICULA_DUPLICADA\", () => {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j.codigo).to.eql(\"MATRICULA_DUPLICADA\");",
+                  "    pm.expect(j).to.have.property(\"mensaje\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05 Misiones: proceso central",
+      "item": [
+        {
+          "name": "Solicitar pulverizacion -> PROGRAMADA",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{gatewayUrl}}/api/misiones",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenProductor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loteId\": {{loteNorteId}},\n  \"tipo\": \"PULVERIZACION\",\n  \"productoId\": {{productoId}},\n  \"recetaNro\": \"R-{{sufijo}}\",\n  \"fechaLimite\": \"{{fechaLimite}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Queda PROGRAMADA con ventana, piloto, dron y evaluacion APTA\", () => {",
+                  "    pm.expect(j.estado).to.eql(\"PROGRAMADA\");",
+                  "    pm.expect(j.ventana.inicio).to.be.a(\"string\");",
+                  "    pm.expect(j.pilotoId).to.be.a(\"number\");",
+                  "    pm.expect(j.dronId).to.be.a(\"number\");",
+                  "    pm.expect(j.motivos).to.be.empty;",
+                  "    pm.expect(j.evaluacion.resultado).to.eql(\"APTA\");",
+                  "});",
+                  "pm.collectionVariables.set(\"misionId\", j.id);",
+                  "pm.collectionVariables.set(\"modoSimulado\", String(j.evaluacion.fuente === \"simulado\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consultar la mision",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{gatewayUrl}}/api/misiones/{{misionId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenProductor}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ventanas aptas encontradas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{gatewayUrl}}/api/misiones/{{misionId}}/ventanas",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenProductor}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Hay al menos una ventana, ordenadas por margen\", () => {",
+                  "    const v = pm.response.json();",
+                  "    pm.expect(v.length).to.be.above(0);",
+                  "    for (let i = 1; i < v.length; i++) pm.expect(v[i - 1].margen).to.be.at.least(v[i].margen);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Mis misiones (productor1)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{gatewayUrl}}/api/misiones/mias",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenProductor}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Incluye la mision solicitada\", () =>",
+                  "    pm.expect(pm.response.json().map(m => m.id)).to.include(Number(pm.collectionVariables.get(\"misionId\"))));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Solicitar monitoreo -> PROGRAMADA (dron con camara)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{gatewayUrl}}/api/misiones",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenProductor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loteId\": {{loteNorteId}},\n  \"tipo\": \"MONITOREO\",\n  \"fechaLimite\": \"{{fechaLimite}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "",
+                  "pm.test(\"Queda PROGRAMADA\", () => pm.expect(pm.response.json().estado).to.eql(\"PROGRAMADA\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "RN-09: etapa prohibida para el producto -> RECHAZADA",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{gatewayUrl}}/api/misiones",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenProductor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loteId\": {{loteSurId}},\n  \"tipo\": \"PULVERIZACION\",\n  \"productoId\": {{productoId}},\n  \"recetaNro\": \"R-{{sufijo}}\",\n  \"fechaLimite\": \"{{fechaLimite}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "",
+                  "const j = pm.response.json();",
+                  "pm.test(\"La mision queda RECHAZADA con motivo ETAPA_PROHIBIDA\", () => {",
+                  "    pm.expect(j.estado).to.eql(\"RECHAZADA\");",
+                  "    pm.expect(j.motivos.map(m => m.codigo)).to.include(\"ETAPA_PROHIBIDA\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "RN-10: intervalo minimo (historico de demostracion) -> RECHAZADA",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{gatewayUrl}}/api/misiones",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenProductor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loteId\": 900001,\n  \"tipo\": \"PULVERIZACION\",\n  \"productoId\": 900001,\n  \"recetaNro\": \"R-{{sufijo}}\",\n  \"fechaLimite\": \"{{fechaLimite}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "",
+                  "const j = pm.response.json();",
+                  "pm.test(\"La mision queda RECHAZADA con motivo INTERVALO_MINIMO\", () => {",
+                  "    pm.expect(j.estado).to.eql(\"RECHAZADA\");",
+                  "    pm.expect(j.motivos.map(m => m.codigo)).to.include(\"INTERVALO_MINIMO\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "RN-16: sin ventana climatica (escenario VENTOSO) -> RECHAZADA",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{gatewayUrl}}/api/misiones",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenProductor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loteId\": {{loteVentosoId}},\n  \"tipo\": \"PULVERIZACION\",\n  \"productoId\": {{productoId}},\n  \"recetaNro\": \"R-{{sufijo}}\",\n  \"fechaLimite\": \"{{fechaLimite}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.collectionVariables.get(\"modoSimulado\") !== \"true\") {",
+                  "    console.log(\"Se omite: requiere CLIMA_PROVEEDOR=simulado\");",
+                  "    pm.execution.skipRequest();",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "",
+                  "const j = pm.response.json();",
+                  "pm.test(\"La mision queda RECHAZADA con motivo SIN_VENTANA_CLIMATICA\", () => {",
+                  "    pm.expect(j.estado).to.eql(\"RECHAZADA\");",
+                  "    pm.expect(j.motivos.map(m => m.codigo)).to.include(\"SIN_VENTANA_CLIMATICA\");",
+                  "});",
+                  "pm.test(\"Informa la variable que mas franjas bloqueo\", () =>",
+                  "    pm.expect(pm.response.json().motivos[0].detalle).to.include(\"franjas\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "RN-08: pulverizacion sin receta -> 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{gatewayUrl}}/api/misiones",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenProductor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loteId\": {{loteNorteId}},\n  \"tipo\": \"PULVERIZACION\",\n  \"productoId\": {{productoId}},\n  \"fechaLimite\": \"{{fechaLimite}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+                  "",
+                  "pm.test(\"Formato de error comun con codigo SOLICITUD_INVALIDA\", () => {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j.codigo).to.eql(\"SOLICITUD_INVALIDA\");",
+                  "    pm.expect(j).to.have.property(\"mensaje\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Producto inexistente -> 404",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{gatewayUrl}}/api/misiones",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenProductor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loteId\": {{loteNorteId}},\n  \"tipo\": \"PULVERIZACION\",\n  \"productoId\": 99999999,\n  \"recetaNro\": \"R-1\",\n  \"fechaLimite\": \"{{fechaLimite}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+                  "",
+                  "pm.test(\"Formato de error comun con codigo RECURSO_NO_ENCONTRADO\", () => {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j.codigo).to.eql(\"RECURSO_NO_ENCONTRADO\");",
+                  "    pm.expect(j).to.have.property(\"mensaje\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "RN-07: lote de otro productor -> 404",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{gatewayUrl}}/api/misiones",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenProductor2}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loteId\": {{loteNorteId}},\n  \"tipo\": \"MONITOREO\",\n  \"fechaLimite\": \"{{fechaLimite}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+                  "",
+                  "pm.test(\"Formato de error comun con codigo RECURSO_NO_ENCONTRADO\", () => {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j.codigo).to.eql(\"RECURSO_NO_ENCONTRADO\");",
+                  "    pm.expect(j).to.have.property(\"mensaje\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Un piloto no puede solicitar misiones -> 403",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{gatewayUrl}}/api/misiones",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenPiloto}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loteId\": {{loteNorteId}},\n  \"tipo\": \"MONITOREO\",\n  \"fechaLimite\": \"{{fechaLimite}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Otro productor no ve la mision -> 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{gatewayUrl}}/api/misiones/{{misionId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenProductor2}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+                  "",
+                  "pm.test(\"Formato de error comun con codigo RECURSO_NO_ENCONTRADO\", () => {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j.codigo).to.eql(\"RECURSO_NO_ENCONTRADO\");",
+                  "    pm.expect(j).to.have.property(\"mensaje\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "06 Cancelacion",
+      "item": [
+        {
+          "name": "Otro productor no puede cancelar -> 404",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{gatewayUrl}}/api/misiones/{{misionId}}/cancelar",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenProductor2}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cancelar la mision -> CANCELADA (libera piloto y dron)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{gatewayUrl}}/api/misiones/{{misionId}}/cancelar",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenProductor}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Queda CANCELADA\", () => pm.expect(pm.response.json().estado).to.eql(\"CANCELADA\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cancelar otra vez -> 409",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{gatewayUrl}}/api/misiones/{{misionId}}/cancelar",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenProductor}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));",
+                  "",
+                  "pm.test(\"Formato de error comun con codigo TRANSICION_INVALIDA\", () => {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j.codigo).to.eql(\"TRANSICION_INVALIDA\");",
+                  "    pm.expect(j).to.have.property(\"mensaje\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "07 Falla cerrada",
+      "item": [
+        {
+          "name": "Proveedor climatico caido (escenario SIN_SERVICIO) -> 503 con Retry-After",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{gatewayUrl}}/api/misiones",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenProductor}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loteId\": {{loteSinServicioId}},\n  \"tipo\": \"MONITOREO\",\n  \"fechaLimite\": \"{{fechaLimite}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.collectionVariables.get(\"modoSimulado\") !== \"true\") {",
+                  "    console.log(\"Se omite: requiere CLIMA_PROVEEDOR=simulado\");",
+                  "    pm.execution.skipRequest();",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 503\", () => pm.response.to.have.status(503));",
+                  "",
+                  "pm.test(\"Formato de error comun con codigo DEPENDENCIA_NO_DISPONIBLE\", () => {",
+                  "    const j = pm.response.json();",
+                  "    pm.expect(j.codigo).to.eql(\"DEPENDENCIA_NO_DISPONIBLE\");",
+                  "    pm.expect(j).to.have.property(\"mensaje\");",
+                  "});",
+                  "pm.test(\"Indica cuando reintentar\", () => pm.response.to.have.header(\"Retry-After\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
