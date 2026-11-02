@@ -1,0 +1,47 @@
+server:
+  port: ${SERVER_PORT:8082}
+
+spring:
+  application:
+    name: ms-campos
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/agrodrones}
+    username: ${DB_USER:campos_user}
+    password: ${DB_PASSWORD:campos_pass}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: campos
+  flyway:
+    schemas: campos
+    default-schema: campos
+    create-schemas: false
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Las claves se descargan por la red interna; el emisor es la URL publica de Keycloak.
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://localhost:8081/realms/agrodrones/protocol/openid-connect/certs}
+          issuer-uri: ${KEYCLOAK_ISSUER:http://localhost:8081/realms/agrodrones}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+agrodrones:
+  openapi:
+    titulo: ms-campos
+    descripcion: Establecimientos, lotes, cultivos y etapas. Informa el contexto del lote a ms-misiones.
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
