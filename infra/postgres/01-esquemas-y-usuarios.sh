@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Crea un esquema y un usuario de base por microservicio. Cada usuario es dueno solo de su esquema:
 # ms-campos no puede leer el esquema misiones y viceversa (separacion de datos entre servicios).
 set -euo pipefail
