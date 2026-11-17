@@ -87,13 +87,13 @@ sequenceDiagram
         M-->>P: 503 (falla cerrada)
     end
     M->>M: por modelo de dron: duración (RN-14), franjas aptas, ventanas (RN-15)
-    M->>DB: BEGIN; SELECT drones y pilotos FOR UPDATE (orden por id)
+    M->>DB: BEGIN - SELECT drones y pilotos FOR UPDATE (orden por id)
     M->>DB: verifica RN-01 a RN-06 en cada ventana, de mejor a peor
     alt hay ventana, dron y piloto
-        M->>DB: misión PROGRAMADA + evaluación APTA; COMMIT
+        M->>DB: misión PROGRAMADA + evaluación APTA (COMMIT)
         M-->>P: 201 PROGRAMADA (ventana, piloto, dron)
     else sin ventana o sin recursos
-        M->>DB: misión RECHAZADA + evaluación; COMMIT
+        M->>DB: misión RECHAZADA + evaluación (COMMIT)
         M-->>P: 201 RECHAZADA (SIN_VENTANA_CLIMATICA y variable, o sin recursos)
     end
 ```
