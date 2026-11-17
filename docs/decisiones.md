@@ -1,6 +1,6 @@
 # Decisiones del MVP y trazabilidad
 
-Este documento resume las decisiones con las que se implementó el MVP y dónde está cada regla en el código y en las pruebas. El análisis completo y la discusión de cada decisión están en el documento de análisis del equipo, pestaña "Diseño MVP definitivo (v3)".
+Este documento resume las decisiones con las que se implementó el MVP y dónde está cada regla en el código y en las pruebas. El análisis completo y la discusión de cada decisión están en el documento de análisis del equipo, pestaña "Diseño MVP definitivo (v3)"
 
 ## Alcance
 
